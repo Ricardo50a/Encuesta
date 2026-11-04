@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Evaluación Ruta San Martín</title>
     <style>
-        /* Estilos generales y paleta de colores patrimonial */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f4f4f9;
@@ -20,10 +19,16 @@
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            /* Animación de entrada estilo "flex" */
+            animation: aparecer 0.8s ease-out;
+        }
+        @keyframes aparecer {
+            0%   { opacity: 0; transform: scale(0.9) translateY(20px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
         }
         h1 {
             text-align: center;
-            color: #8B4513; /* Color tierra/madera */
+            color: #8B4513;
             font-size: 24px;
             margin-bottom: 5px;
         }
@@ -43,9 +48,7 @@
             margin-top: 25px;
             margin-bottom: 15px;
         }
-        .form-group {
-            margin-bottom: 15px;
-        }
+        .form-group { margin-bottom: 15px; }
         label {
             display: block;
             font-weight: bold;
@@ -71,7 +74,6 @@
             align-items: center;
             gap: 5px;
         }
-        /* Escala de satisfacción 1 al 5 */
         .scale-group {
             display: flex;
             justify-content: space-between;
@@ -84,7 +86,6 @@
             font-weight: normal;
             cursor: pointer;
         }
-        /* Botón de envío */
         .btn-submit {
             width: 100%;
             background-color: #8B4513;
@@ -96,10 +97,16 @@
             font-weight: bold;
             cursor: pointer;
             margin-top: 30px;
-            transition: background 0.3s;
+            transition: background 0.3s, transform 0.2s;
         }
         .btn-submit:hover {
             background-color: #A0522D;
+            transform: scale(1.02);
+        }
+        .btn-submit:disabled {
+            background-color: #bbb;
+            cursor: not-allowed;
+            transform: none;
         }
         .footer {
             text-align: center;
@@ -107,6 +114,68 @@
             color: #888;
             margin-top: 20px;
         }
+
+        /* ===== PANTALLA DE AGRADECIMIENTO ===== */
+        .gracias-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(139, 69, 19, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.6s ease, visibility 0.6s;
+        }
+        .gracias-overlay.activo {
+            opacity: 1;
+            visibility: visible;
+        }
+        .gracias-card {
+            background: #fff;
+            padding: 40px 30px;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 90%;
+            width: 400px;
+            transform: scale(0.7) translateY(30px);
+            transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .gracias-overlay.activo .gracias-card {
+            transform: scale(1) translateY(0);
+        }
+        .gracias-card .check {
+            font-size: 60px;
+            margin-bottom: 15px;
+            animation: pop 0.6s 0.3s both;
+        }
+        @keyframes pop {
+            0%   { transform: scale(0); }
+            80%  { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        .gracias-card h2 {
+            color: #8B4513;
+            font-size: 26px;
+            margin: 0 0 10px;
+        }
+        .gracias-card p {
+            color: #555;
+            font-size: 16px;
+            margin: 0 0 20px;
+        }
+        .gracias-card button {
+            background: #8B4513;
+            color: #fff;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 15px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .gracias-card button:hover { background: #A0522D; }
     </style>
 </head>
 <body>
@@ -115,22 +184,17 @@
     <h1>Ruta Turística Patrimonial San Martín</h1>
     <h2>Formulario de Evaluación de la Experiencia</h2>
 
-    <!-- INICIO DEL FORMULARIO -->
-    <form action="#" method="POST">
-        
+    <form id="formRuta">
         <!-- SECCIÓN 1 -->
         <div class="section-title">1. Información General</div>
-        
         <div class="form-group">
             <label for="nombre">Nombre (Opcional):</label>
             <input type="text" id="nombre" name="nombre" placeholder="Tu nombre">
         </div>
-
         <div class="form-group">
             <label for="edad">Edad:</label>
             <input type="number" id="edad" name="edad" placeholder="Ej. 25" min="10" max="99">
         </div>
-
         <div class="form-group">
             <label for="procedencia">Procedencia:</label>
             <select id="procedencia" name="procedencia">
@@ -139,7 +203,6 @@
                 <option value="Extranjero">Extranjero</option>
             </select>
         </div>
-
         <div class="form-group">
             <label>¿Cómo se enteró de la existencia de la ruta?</label>
             <div class="radio-group">
@@ -152,107 +215,99 @@
 
         <!-- SECCIÓN 2 -->
         <div class="section-title">2. Evaluación del Recorrido Peatonal</div>
-        <p style="font-size: 14px; color: #666; margin-top: -10px;">(1 = Malo, 5 = Excelente)</p>
+        <p style="font-size:14px;color:#666;margin-top:-10px;">(1 = Malo, 5 = Excelente)</p>
 
         <div class="form-group">
             <label>Organización general de la ruta:</label>
             <div class="scale-group">
-                <label><input type="radio" name="org_ruta" value="1"> 1</label>
-                <label><input type="radio" name="org_ruta" value="2"> 2</label>
-                <label><input type="radio" name="org_ruta" value="3"> 3</label>
-                <label><input type="radio" name="org_ruta" value="4"> 4</label>
-                <label><input type="radio" name="org_ruta" value="5"> 5</label>
+                <label><input type="radio" name="org_ruta" value="1">1</label>
+                <label><input type="radio" name="org_ruta" value="2">2</label>
+                <label><input type="radio" name="org_ruta" value="3">3</label>
+                <label><input type="radio" name="org_ruta" value="4">4</label>
+                <label><input type="radio" name="org_ruta" value="5">5</label>
             </div>
         </div>
-
         <div class="form-group">
-            <label>Duración optimizada (1 hora 40 minutos):</label>
+            <label>Duración optimizada (1h 40min):</label>
             <div class="scale-group">
-                <label><input type="radio" name="duracion" value="1"> 1</label>
-                <label><input type="radio" name="duracion" value="2"> 2</label>
-                <label><input type="radio" name="duracion" value="3"> 3</label>
-                <label><input type="radio" name="duracion" value="4"> 4</label>
-                <label><input type="radio" name="duracion" value="5"> 5</label>
+                <label><input type="radio" name="duracion" value="1">1</label>
+                <label><input type="radio" name="duracion" value="2">2</label>
+                <label><input type="radio" name="duracion" value="3">3</label>
+                <label><input type="radio" name="duracion" value="4">4</label>
+                <label><input type="radio" name="duracion" value="5">5</label>
             </div>
         </div>
-
         <div class="form-group">
             <label>Accesibilidad física de las aceras:</label>
             <div class="scale-group">
-                <label><input type="radio" name="accesibilidad" value="1"> 1</label>
-                <label><input type="radio" name="accesibilidad" value="2"> 2</label>
-                <label><input type="radio" name="accesibilidad" value="3"> 3</label>
-                <label><input type="radio" name="accesibilidad" value="4"> 4</label>
-                <label><input type="radio" name="accesibilidad" value="5"> 5</label>
+                <label><input type="radio" name="accesibilidad" value="1">1</label>
+                <label><input type="radio" name="accesibilidad" value="2">2</label>
+                <label><input type="radio" name="accesibilidad" value="3">3</label>
+                <label><input type="radio" name="accesibilidad" value="4">4</label>
+                <label><input type="radio" name="accesibilidad" value="5">5</label>
             </div>
         </div>
-
         <div class="form-group">
             <label>Funcionalidad del punto de descanso (Plaza Maternidad):</label>
             <div class="scale-group">
-                <label><input type="radio" name="plaza_maternidad" value="1"> 1</label>
-                <label><input type="radio" name="plaza_maternidad" value="2"> 2</label>
-                <label><input type="radio" name="plaza_maternidad" value="3"> 3</label>
-                <label><input type="radio" name="plaza_maternidad" value="4"> 4</label>
-                <label><input type="radio" name="plaza_maternidad" value="5"> 5</label>
+                <label><input type="radio" name="plaza_maternidad" value="1">1</label>
+                <label><input type="radio" name="plaza_maternidad" value="2">2</label>
+                <label><input type="radio" name="plaza_maternidad" value="3">3</label>
+                <label><input type="radio" name="plaza_maternidad" value="4">4</label>
+                <label><input type="radio" name="plaza_maternidad" value="5">5</label>
             </div>
         </div>
 
         <!-- SECCIÓN 3 -->
         <div class="section-title">3. Evaluación del Guía Comunitario</div>
-        <p style="font-size: 14px; color: #666; margin-top: -10px;">(1 = Malo, 5 = Excelente)</p>
+        <p style="font-size:14px;color:#666;margin-top:-10px;">(1 = Malo, 5 = Excelente)</p>
 
         <div class="form-group">
-            <label>Conocimiento histórico y dominio del tema:</label>
+            <label>Conocimiento histórico:</label>
             <div class="scale-group">
-                <label><input type="radio" name="guia_conocimiento" value="1"> 1</label>
-                <label><input type="radio" name="guia_conocimiento" value="2"> 2</label>
-                <label><input type="radio" name="guia_conocimiento" value="3"> 3</label>
-                <label><input type="radio" name="guia_conocimiento" value="4"> 4</label>
-                <label><input type="radio" name="guia_conocimiento" value="5"> 5</label>
+                <label><input type="radio" name="guia_conocimiento" value="1">1</label>
+                <label><input type="radio" name="guia_conocimiento" value="2">2</label>
+                <label><input type="radio" name="guia_conocimiento" value="3">3</label>
+                <label><input type="radio" name="guia_conocimiento" value="4">4</label>
+                <label><input type="radio" name="guia_conocimiento" value="5">5</label>
             </div>
         </div>
-
         <div class="form-group">
-            <label>Claridad, tono y fluidez en la comunicación:</label>
+            <label>Claridad, tono y fluidez:</label>
             <div class="scale-group">
-                <label><input type="radio" name="guia_comunicacion" value="1"> 1</label>
-                <label><input type="radio" name="guia_comunicacion" value="2"> 2</label>
-                <label><input type="radio" name="guia_comunicacion" value="3"> 3</label>
-                <label><input type="radio" name="guia_comunicacion" value="4"> 4</label>
-                <label><input type="radio" name="guia_comunicacion" value="5"> 5</label>
+                <label><input type="radio" name="guia_comunicacion" value="1">1</label>
+                <label><input type="radio" name="guia_comunicacion" value="2">2</label>
+                <label><input type="radio" name="guia_comunicacion" value="3">3</label>
+                <label><input type="radio" name="guia_comunicacion" value="4">4</label>
+                <label><input type="radio" name="guia_comunicacion" value="5">5</label>
             </div>
         </div>
-
         <div class="form-group">
             <label>Cordialidad y atención al grupo:</label>
             <div class="scale-group">
-                <label><input type="radio" name="guia_cortesia" value="1"> 1</label>
-                <label><input type="radio" name="guia_cortesia" value="2"> 2</label>
-                <label><input type="radio" name="guia_cortesia" value="3"> 3</label>
-                <label><input type="radio" name="guia_cortesia" value="4"> 4</label>
-                <label><input type="radio" name="guia_cortesia" value="5"> 5</label>
+                <label><input type="radio" name="guia_cortesia" value="1">1</label>
+                <label><input type="radio" name="guia_cortesia" value="2">2</label>
+                <label><input type="radio" name="guia_cortesia" value="3">3</label>
+                <label><input type="radio" name="guia_cortesia" value="4">4</label>
+                <label><input type="radio" name="guia_cortesia" value="5">5</label>
             </div>
         </div>
 
         <!-- SECCIÓN 4 -->
         <div class="section-title">4. Impacto y Recomendaciones</div>
-
         <div class="form-group">
-            <label>¿Recomendaría esta ruta a otros ciudadanos?</label>
+            <label>¿Recomendaría esta ruta?</label>
             <div class="radio-group">
                 <label><input type="radio" name="recomienda" value="Si"> Sí</label>
                 <label><input type="radio" name="recomienda" value="No"> No</label>
             </div>
         </div>
-
         <div class="form-group">
             <label>¿Cuál fue el hito o relato más interesante?</label>
             <input type="text" name="hito_favorito" placeholder="Ej. Plaza Capuchinos, Iglesia San Juan...">
         </div>
-
         <div class="form-group">
-            <label>¿Qué elementos mejoraría de la experiencia?</label>
+            <label>¿Qué elementos mejoraría?</label>
             <textarea name="mejoras" rows="3" placeholder="Sus sugerencias nos ayudan a crecer..."></textarea>
         </div>
 
@@ -260,26 +315,90 @@
         <div class="section-title">5. Calificación Global</div>
         <div class="form-group">
             <label>¿Cómo califica la ruta en general? (1 al 5)</label>
-            <div class="scale-group" style="justify-content: center; gap: 20px;">
-                <label><input type="radio" name="calificacion_global" value="1"> 1</label>
-                <label><input type="radio" name="calificacion_global" value="2"> 2</label>
-                <label><input type="radio" name="calificacion_global" value="3"> 3</label>
-                <label><input type="radio" name="calificacion_global" value="4"> 4</label>
-                <label><input type="radio" name="calificacion_global" value="5"> 5</label>
+            <div class="scale-group" style="justify-content:center;gap:20px;">
+                <label><input type="radio" name="calificacion_global" value="1">1</label>
+                <label><input type="radio" name="calificacion_global" value="2">2</label>
+                <label><input type="radio" name="calificacion_global" value="3">3</label>
+                <label><input type="radio" name="calificacion_global" value="4">4</label>
+                <label><input type="radio" name="calificacion_global" value="5">5</label>
             </div>
         </div>
 
-        <!-- BOTÓN DE ENVÍO -->
-        <button type="submit" class="btn-submit">Enviar Evaluación</button>
-
+        <button type="submit" class="btn-submit" id="btnEnviar">Enviar Evaluación</button>
     </form>
-    <!-- FIN DEL FORMULARIO -->
 
     <div class="footer">
         Ruta Turística Patrimonial San Martín - Parroquia San Juan<br>
         Proyecto de Grado - Universidad 19 de Abril
     </div>
 </div>
+
+<!-- PANTALLA DE AGRADECIMIENTO -->
+<div class="gracias-overlay" id="graciasOverlay">
+    <div class="gracias-card">
+        <div class="check">✅</div>
+        <h2>¡Gracias por su atención!</h2>
+        <p>Su evaluación ha sido registrada exitosamente.<br>Nos ayuda a mejorar esta experiencia patrimonial.</p>
+        <button onclick="reiniciarFormulario()">Enviar otra respuesta</button>
+    </div>
+</div>
+
+<script>
+    
+    const URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbzPChs1T1sQ42GuNaH3b6HNd2R9VQE-U6WggMrKbtZx9C-3pWPxtR0VV52_ixYQ_3I7KQ/exec';
+
+    const form = document.getElementById('formRuta');
+    const btn = document.getElementById('btnEnviar');
+    const overlay = document.getElementById('graciasOverlay');
+
+    form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        // Validación mínima: al menos la calificación global
+        const global = form.querySelector('input[name="calificacion_global"]:checked');
+        if (!global) {
+            alert('Por favor, selecciona una calificación global (1 al 5).');
+            return;
+        }
+
+        // Recopilar todos los campos
+        const formData = new FormData(form);
+        const data = {};
+        for (let [key, value] of formData.entries()) {
+            data[key] = value;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'Enviando...';
+
+        try {
+            // fetch con no-cors para evitar bloqueos de CORS en Apps Script
+            await fetch(URL_SCRIPT, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(data)
+            });
+
+            // Mostrar animación de agradecimiento
+            overlay.classList.add('activo');
+            btn.textContent = 'Enviado ✓';
+        } catch (err) {
+            console.error(err);
+            alert('Hubo un problema al enviar. Intenta de nuevo.');
+            btn.disabled = false;
+            btn.textContent = 'Enviar Evaluación';
+        }
+    });
+
+    function reiniciarFormulario() {
+        overlay.classList.remove('activo');
+        form.reset();
+        btn.disabled = false;
+        btn.textContent = 'Enviar Evaluación';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
 
 </body>
 </html>
