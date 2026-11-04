@@ -336,7 +336,8 @@
 </div>
 
 <script>
-    // IMPORTANTE: Asegúrate de que esta sea la URL de tu última implementación
+     <script>
+    // Pega aquí la URL de tu NUEVA implementación
     const URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbxOSbrPKcP8JP_HUBjuxHZYtaJfHKykGLRSd55LEE2wjwvsucpzlYtJreyycTukgcFzkQ/exec';
 
     const form = document.getElementById('formRuta');
@@ -352,26 +353,21 @@
             return;
         }
 
-        // Recopilar todos los campos
         const formData = new FormData(form);
         const data = {};
         for (let [key, value] of formData.entries()) {
             data[key] = value;
         }
 
-        // AQUÍ ESTÁ EL TRUCO DE LA HORA: Justo antes de enviar
-        const ahora = new Date();
-        ahora.setHours(ahora.getHours() - 4);
-        data.fecha_manual = ahora.toLocaleString('es-VE', { timeZone: 'America/Caracas' });
-
         btn.disabled = true;
         btn.textContent = 'Enviando...';
 
         try {
+            // Quitamos 'no-cors' y enviamos los datos de forma limpia
             await fetch(URL_SCRIPT, {
                 method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                mode: 'cors',
+                headers: { 'Content-Type': 'text/plain' },
                 body: JSON.stringify(data)
             });
 
@@ -392,6 +388,7 @@
         btn.textContent = 'Enviar Evaluación';
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+</script>   
 </script>
 
 </body>
