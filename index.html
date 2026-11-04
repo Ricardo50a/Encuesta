@@ -398,6 +398,12 @@
         btn.textContent = 'Enviar Evaluación';
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+
+    // Reloj de Venezuela
+const ahora = new Date();
+ahora.setHours(ahora.getHours() - 4);
+data.fecha_manual = ahora.toLocaleString('es-VE', { timeZone: 'America/Caracas' });
+    
 </script>
 
 </body>
